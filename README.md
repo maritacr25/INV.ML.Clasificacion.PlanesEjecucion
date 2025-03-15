@@ -83,7 +83,7 @@ Contiene un script sql con las tablas y procedimientos almacenados requeridos pa
 Para ejecutar el proyecto, simplemente ejecuta el archivo de la opcion que deseas analizar, por ejemplo `analisiseda.py`:
 ```sh
 cd .\app\
-python analisisedad.py
+python analisiseda.py
 ```
 
 ## Contribuciones
