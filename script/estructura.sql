@@ -95,3 +95,129 @@ BEGIN
 	where last_execution_time  > (CASE WHEN (SELECT max(last_execution_time) FROM DSBase) IS NOT NULL THEN (SELECT max(last_execution_time) FROM DSBase) ELSE (SELECT DATEADD(Minute,-5, GETDATE())) END )
 END;
 
+-----Creacion de Jobs
+USE [msdb]
+GO
+DECLARE @jobId BINARY(16)
+EXEC  msdb.dbo.sp_add_job @job_name=N'JOBRecopilaInformacionEstadistica', 
+		@enabled=1, 
+		@notify_level_eventlog=0, 
+		@notify_level_email=2, 
+		@notify_level_page=2, 
+		@delete_level=0, 
+		@description=N'Recopila de la vista sys.dm_exec_query_stats', 
+		@category_name=N'[Uncategorized (Local)]', 
+		@owner_login_name=N'sa', @job_id = @jobId OUTPUT
+select @jobId
+GO
+EXEC msdb.dbo.sp_add_jobserver @job_name=N'JOBRecopilaInformacionEstadistica', @server_name = N'MURENAPC\MURENA'
+GO
+USE [msdb]
+GO
+EXEC msdb.dbo.sp_add_jobstep @job_name=N'JOBRecopilaInformacionEstadistica', @step_name=N'Ejecuta SP', 
+		@step_id=1, 
+		@cmdexec_success_code=0, 
+		@on_success_action=1, 
+		@on_fail_action=2, 
+		@retry_attempts=0, 
+		@retry_interval=0, 
+		@os_run_priority=0, @subsystem=N'TSQL', 
+		@command=N'exec InsertQueryStats', 
+		@database_name=N'NWideWorldImporters', 
+		@flags=0
+GO
+USE [msdb]
+GO
+EXEC msdb.dbo.sp_update_job @job_name=N'JOBRecopilaInformacionEstadistica', 
+		@enabled=1, 
+		@start_step_id=1, 
+		@notify_level_eventlog=0, 
+		@notify_level_email=2, 
+		@notify_level_page=2, 
+		@delete_level=0, 
+		@description=N'Recopila de la vista sys.dm_exec_query_stats', 
+		@category_name=N'[Uncategorized (Local)]', 
+		@owner_login_name=N'sa', 
+		@notify_email_operator_name=N'', 
+		@notify_page_operator_name=N''
+GO
+USE [msdb]
+GO
+DECLARE @schedule_id int
+EXEC msdb.dbo.sp_add_jobschedule @job_name=N'JOBRecopilaInformacionEstadistica', @name=N'ten-second', 
+		@enabled=1, 
+		@freq_type=4, 
+		@freq_interval=1, 
+		@freq_subday_type=2, 
+		@freq_subday_interval=10, 
+		@freq_relative_interval=0, 
+		@freq_recurrence_factor=1, 
+		@active_start_date=20250226, 
+		@active_end_date=99991231, 
+		@active_start_time=0, 
+		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
+select @schedule_id
+GO
+
+USE [msdb]
+GO
+DECLARE @jobId BINARY(16)
+EXEC  msdb.dbo.sp_add_job @job_name=N'JOBProcesaInformacionEstadistica', 
+		@enabled=1, 
+		@notify_level_eventlog=0, 
+		@notify_level_email=2, 
+		@notify_level_page=2, 
+		@delete_level=0, 
+		@description=N'Procesa la información capturada en QueryStats para insertarla en la tabla DSBase', 
+		@category_name=N'Data Collector', 
+		@owner_login_name=N'sa', @job_id = @jobId OUTPUT
+select @jobId
+GO
+EXEC msdb.dbo.sp_add_jobserver @job_name=N'JOBProcesaInformacionEstadistica', @server_name = N'MURENAPC\MURENA'
+GO
+USE [msdb]
+GO
+EXEC msdb.dbo.sp_add_jobstep @job_name=N'JOBProcesaInformacionEstadistica', @step_name=N'Ejecuta sp InsertDataSetBase', 
+		@step_id=1, 
+		@cmdexec_success_code=0, 
+		@on_success_action=1, 
+		@on_fail_action=2, 
+		@retry_attempts=0, 
+		@retry_interval=0, 
+		@os_run_priority=0, @subsystem=N'TSQL', 
+		@command=N'exec InsertDataSetBase', 
+		@database_name=N'NWideWorldImporters', 
+		@flags=0
+GO
+USE [msdb]
+GO
+EXEC msdb.dbo.sp_update_job @job_name=N'JOBProcesaInformacionEstadistica', 
+		@enabled=1, 
+		@start_step_id=1, 
+		@notify_level_eventlog=0, 
+		@notify_level_email=2, 
+		@notify_level_page=2, 
+		@delete_level=0, 
+		@description=N'Procesa la información capturada en QueryStats para insertarla en la tabla DSBase', 
+		@category_name=N'Data Collector', 
+		@owner_login_name=N'sa', 
+		@notify_email_operator_name=N'', 
+		@notify_page_operator_name=N''
+GO
+USE [msdb]
+GO
+DECLARE @schedule_id int
+EXEC msdb.dbo.sp_add_jobschedule @job_name=N'JOBProcesaInformacionEstadistica', @name=N'ten-minutes', 
+		@enabled=1, 
+		@freq_type=4, 
+		@freq_interval=1, 
+		@freq_subday_type=4, 
+		@freq_subday_interval=10, 
+		@freq_relative_interval=0, 
+		@freq_recurrence_factor=1, 
+		@active_start_date=20250226, 
+		@active_end_date=99991231, 
+		@active_start_time=0, 
+		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
+select @schedule_id
+GO

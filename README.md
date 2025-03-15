@@ -61,7 +61,7 @@ Contiene los conjuntos de datos utilizados en el proyecto:
 ### Carpeta `script/`
 Contiene un script sql con las tablas y procedimientos almacenados requeridos para la captura de los datos.
 
--  `estructura.sql` : crea tablas: DSBase y QueryStats, además de los procedimientos almacenados: InsertQueryStats y InsertDataSetBase
+-  `estructura.sql` : crea tablas: DSBase y QueryStats, además de los procedimientos almacenados: InsertQueryStats y InsertDataSetBase. También se define los jobs que capturan los datos.
 
 ## Instalación
 
