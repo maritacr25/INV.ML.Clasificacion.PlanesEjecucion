@@ -28,6 +28,8 @@ app/
         Utilitarios.cpython-312.pyc
 data/
     entrenamiento.csv
+script/
+    estructura.sql
 ```
 
 ## Archivos Principales
@@ -55,6 +57,11 @@ Contiene los scripts para diferentes análisis y modelos de clasificación:
 Contiene los conjuntos de datos utilizados en el proyecto:
 
 - `entrenamiento.csv`: Conjunto de datos de entrenamiento ejemplo con información relacionada a estadísiticas de planes de ejecución SQL.
+
+### Carpeta `script/`
+Contiene un script sql con las tablas y procedimientos almacenados requeridos para la captura de los datos.
+
+-  `estructura.sql` : crea tablas: DSBase y QueryStats, además de los procedimientos almacenados: InsertQueryStats y InsertDataSetBase
 
 ## Instalación
 
