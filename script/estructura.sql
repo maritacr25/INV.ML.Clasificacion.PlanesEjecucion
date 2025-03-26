@@ -221,3 +221,36 @@ EXEC msdb.dbo.sp_add_jobschedule @job_name=N'JOBProcesaInformacionEstadistica', 
 		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
 select @schedule_id
 GO
+
+-----Creacion de Funcion que calcula la categoría
+CREATE FUNCTION dbo.OBTENER_CATEGORIA( @tiempoEjecucion as bigint,
+			@table_scan_flag as bit,
+			@warnings_flag as bit,
+			@index_suggestion_flag as bit )
+			RETURNS int
+BEGIN
+	declare @categoria as varchar(15)
+	IF @tiempoEjecucion <= 2000 
+   AND @index_suggestion_flag = 0 
+           AND @warnings_flag =0 
+   AND @table_scan_flag=0 
+		SET @categoria = 2--'OPTIMIZADO'	
+	ELSE 
+		SET @categoria = 1--'POR OPTIMIZAR'
+	RETURN @categoria
+END
+GO
+---Consulta SQL para obtener el conjunto de datos
+SELECT idconsulta,
+       creation_time,
+       index_suggestions_flag,
+       warnings_flag,
+       table_scan_flag,
+       index_scan_flag,
+       last_execution_time,
+       last_worker_time,
+       last_logical_reads,
+       last_elapsed_time,
+       dbo.OBTENER_CATEGORIA(last_elapsed_time, table_scan_flag, warnings_flag,
+			  index_suggestions_flag) Categoria
+FROM   DSBASE
